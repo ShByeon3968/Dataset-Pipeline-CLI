@@ -1,0 +1,11 @@
+# CLI 실행 환경 (Python 3.11+)
+
+# CLI 프레임워크
+typer[all]>=0.12.0       # click 기반, 타입힌트 자동 --help 생성
+rich>=13.7.0             # 터미널 컬러·테이블·진행바
+
+# HTTP 클라이언트
+httpx>=0.27.0            # sync + streaming download
+
+# TOML 설정 (Python 3.11+ 내장 tomllib; 하위 버전용)
+tomli>=2.0.1 ; python_version < "3.11"

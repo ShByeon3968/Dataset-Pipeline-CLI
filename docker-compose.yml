@@ -1,0 +1,75 @@
+# Dataset Pipeline CLI — 서버 구성 (db + backend only)
+# React 프론트엔드가 제거되었습니다. CLI(pipeline.py)로 모든 작업을 수행합니다.
+#
+# 빠른 시작:
+#   docker compose up -d
+#   python pipeline.py health
+#
+# NAS / 공유 스토리지 설정 방법
+# ─────────────────────────────────────────────────────────────────────
+# NAS가 서버 PC에 마운트되어 있는 경우 (예: /mnt/nas/dataset_pipeline):
+#   1. 루트 .env 파일에 다음을 추가하세요:
+#        UPLOADS_HOST_PATH=/mnt/nas/dataset_pipeline/uploads
+#        EXPORTS_HOST_PATH=/mnt/nas/dataset_pipeline/exports
+#   2. docker compose up -d
+#
+# NAS 없이 서버 로컬 디스크만 사용하는 경우:
+#   UPLOADS_HOST_PATH / EXPORTS_HOST_PATH 를 설정하지 않으면
+#   서버 로컬의 ./data/uploads, ./data/exports 에 저장됩니다.
+# ─────────────────────────────────────────────────────────────────────
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: dataset_pipeline_db_cli
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB: ${DB_NAME:-dataset_pipeline}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./backend
+    container_name: dataset_pipeline_backend_cli
+    env_file: ./backend/.env
+    environment:
+      # Database
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      DB_NAME: ${DB_NAME:-dataset_pipeline}
+      # CORS — 서버 IP 포함 쉼표 구분 목록
+      # 예: CORS_ORIGINS_RAW=http://10.101.0.23:8080,http://localhost:8080
+      CORS_ORIGINS_RAW: ${CORS_ORIGINS_RAW:-http://localhost:5173,http://localhost:3000,http://localhost:8080,http://localhost}
+    volumes:
+      # 업로드 이미지 저장 경로 (NAS: UPLOADS_HOST_PATH=/mnt/nas/... 로 설정)
+      - ${UPLOADS_HOST_PATH:-./data/uploads}:/app/data/uploads
+      # 내보내기(Export ZIP) 저장 경로
+      - ${EXPORTS_HOST_PATH:-./data/exports}:/app/data/exports
+      # 임베딩 캐시 (로컬 전용)
+      - backend_embeddings:/app/data/embeddings
+      # YOLO 모델 파일 (로컬 전용)
+      - ./backend/data/models:/app/data/models
+      # 소스코드 (개발용 hot-reload)
+      - ./backend/app:/app/app
+    ports:
+      - "8001:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: on-failure
+    command: >
+      sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+
+volumes:
+  postgres_data:
+  backend_embeddings:

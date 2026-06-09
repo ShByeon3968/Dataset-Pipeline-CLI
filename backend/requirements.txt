@@ -1,0 +1,49 @@
+# FastAPI & ASGI
+fastapi>=0.111.0
+uvicorn[standard]>=0.30.0
+python-multipart>=0.0.9
+
+# Config
+pydantic-settings>=2.3.0
+
+# Database (PostgreSQL async)
+sqlalchemy>=2.0.31
+asyncpg>=0.29.0
+psycopg2-binary>=2.9.9
+
+# DB migrations
+alembic>=1.13.0
+
+# Image processing
+Pillow>=10.3.0
+opencv-python-headless>=4.9.0
+
+# Hash
+imagehash>=4.3.1
+
+# Export
+lxml>=5.2.0
+
+# Import (YOLO data.yaml parsing)
+pyyaml>=6.0
+
+# Roboflow integration
+roboflow>=1.1.0
+
+# Env vars
+python-dotenv>=1.0.1
+
+# AI Auto-labeling (YOLO-World — open-vocabulary detection)
+# YOLO-World uses CLIP internally for text encoding.
+# Pre-install at build time to prevent runtime auto-install failure (requires git).
+ultralytics>=8.3.0
+numpy>=1.26.0
+scikit-learn>=1.4.0
+git+https://github.com/ultralytics/CLIP.git
+
+# Embedding visualization
+# UMAP 2D projection (GET /analysis/embeddings?method=umap)
+umap-learn>=0.5.6
+
+# ONNX 커스텀 모델 추론
+onnxruntime>=1.18.0

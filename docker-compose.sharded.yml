@@ -1,0 +1,105 @@
+version: "3.9"
+
+# ============================================================
+# Phase 2 — 멀티 DB 샤딩 구성 (3개 샤드)
+# 사용법: docker-compose -f docker-compose.sharded.yml up --build
+# ============================================================
+
+services:
+
+  # ── 샤드 0 (메타 DB 겸 데이터 샤드) ──────────────────────────
+  db_shard0:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB: dataset_shard0
+    volumes:
+      - shard0_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ── 샤드 1 ────────────────────────────────────────────────
+  db_shard1:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB: dataset_shard1
+    volumes:
+      - shard1_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ── 샤드 2 ────────────────────────────────────────────────
+  db_shard2:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB: dataset_shard2
+    volumes:
+      - shard2_data:/var/lib/postgresql/data
+    ports:
+      - "5434:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ── FastAPI 백엔드 ──────────────────────────────────────────
+  backend:
+    build: ./backend
+    environment:
+      # 메인 DB (shard_0과 동일)
+      DB_HOST: db_shard0
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      DB_NAME: dataset_shard0
+      # 샤드 수
+      SHARD_COUNT: 3
+      # 샤드별 연결 정보
+      SHARD_0_DB_HOST: db_shard0
+      SHARD_0_DB_NAME: dataset_shard0
+      SHARD_1_DB_HOST: db_shard1
+      SHARD_1_DB_NAME: dataset_shard1
+      SHARD_2_DB_HOST: db_shard2
+      SHARD_2_DB_NAME: dataset_shard2
+    volumes:
+      - ./backend/data:/app/data
+    ports:
+      - "8000:8000"
+    depends_on:
+      db_shard0:
+        condition: service_healthy
+      db_shard1:
+        condition: service_healthy
+      db_shard2:
+        condition: service_healthy
+    command: >
+      sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"
+
+  # ── 프론트엔드 ────────────────────────────────────────────
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+volumes:
+  shard0_data:
+  shard1_data:
+  shard2_data:
