@@ -33,6 +33,8 @@ Dataset Pipeline CLI/
 │       ├── dataset.py        # pipeline dataset *
 │       ├── upload.py         # pipeline upload *
 │       ├── autolabel.py      # pipeline autolabel *
+│       ├── onnx.py           # pipeline onnx *
+│       ├── augment.py        # pipeline augment *
 │       ├── analysis.py       # pipeline analysis *
 │       ├── refinement.py     # pipeline refinement *
 │       ├── export.py         # pipeline export *
@@ -85,21 +87,25 @@ python pipeline.py dataset create --name "MyDataset" --desc "자율주행 데이
 # 2. 이미지 업로드 (디렉토리)
 python pipeline.py upload images --dataset-id 1 --path ./images/
 
-# 또는 ZIP 업로드 (train/val/test split 포함 가능)
-python pipeline.py upload zip --dataset-id 1 --path ./dataset.zip
+# 3. ONNX 커스텀 모델 관리 (새로운 모델 업로드)
+python pipeline.py onnx upload --path ./model.onnx --name "MyYOLO" --labels '["car","person"]'
+python pipeline.py onnx list
 
-# 3. 자동 라벨링 (YOLO-World)
+# 4. 이미지 증강 (Qwen-Edit) - 오토라벨링 전 데이터 뻥튀기
+python pipeline.py augment run --dataset-id 1 --prompt "45,left" --steps 30
+
+# 5. 자동 라벨링 (YOLO-World)
 python pipeline.py autolabel run \
   --dataset-id 1 \
   --model yolo-world \
   --prompts "person,car,truck,bicycle,traffic light" \
   --conf 0.3
 
-# 3-b. ONNX 커스텀 모델 사용
+# 5-b. ONNX 커스텀 모델 사용
 python pipeline.py autolabel run \
   --dataset-id 1 \
   --model onnx \
-  --onnx-model-id 2 \
+  --onnx-model-id 1 \
   --conf 0.25 --iou 0.45
 
 # 4. 분석
@@ -128,7 +134,7 @@ python pipeline.py export coco --dataset-id 1 --out ./output/
 
 | 환경변수 | 설명 | 기본값 |
 |----------|------|--------|
-| `PIPELINE_BASE_URL` | 백엔드 주소 | `http://localhost:8000` |
+| `PIPELINE_BASE_URL` | 백엔드 주소 | `http://localhost:8001` |
 | `PIPELINE_TIMEOUT`  | HTTP 타임아웃(초) | `120` |
 
 ---
@@ -140,6 +146,8 @@ python pipeline.py --help
 python pipeline.py dataset --help
 python pipeline.py upload --help
 python pipeline.py autolabel --help
+python pipeline.py onnx --help
+python pipeline.py augment --help
 python pipeline.py analysis --help
 python pipeline.py refinement --help
 python pipeline.py export --help

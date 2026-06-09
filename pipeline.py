@@ -19,6 +19,8 @@ from cli.commands import (
     refinement as refinement_cmd,
     export    as export_cmd,
     version   as version_cmd,
+    augment   as augment_cmd,
+    onnx      as onnx_cmd,
 )
 from cli import client, display
 
@@ -36,6 +38,8 @@ app.add_typer(analysis_cmd.app,   name="analysis",   help="데이터셋 분석")
 app.add_typer(refinement_cmd.app, name="refinement", help="데이터 정제")
 app.add_typer(export_cmd.app,     name="export",     help="데이터셋 내보내기")
 app.add_typer(version_cmd.app,    name="version",    help="버저닝 및 모델 리니지")
+app.add_typer(augment_cmd.app,    name="augment",    help="합성 데이터 증강")
+app.add_typer(onnx_cmd.app,       name="onnx",       help="ONNX 커스텀 모델 관리")
 
 
 @app.command("health")

@@ -1,0 +1,22 @@
+# Dataset Pipeline CLI 설정 파일
+# 이 파일을 .pipeline.toml 로 복사하여 사용하세요.
+#
+# 우선순위: 환경변수 > .pipeline.toml (프로젝트) > ~/.pipeline.toml (전역) > 내장 기본값
+
+[api]
+# 백엔드 API 주소 (환경변수: PIPELINE_BASE_URL)
+base_url = "http://localhost:8000"
+
+# HTTP 타임아웃 (초, 환경변수: PIPELINE_TIMEOUT)
+# 대용량 ZIP 업로드나 대규모 자동 라벨링 시 늘리세요.
+timeout = 120.0
+
+[defaults]
+# 내보내기 split 비율 (합계가 1.0이 되도록 맞춰주세요)
+train_ratio = 0.7
+val_ratio   = 0.2
+test_ratio  = 0.1
+
+# 자동 라벨링 기본 임계값
+confidence = 0.25
+iou        = 0.45

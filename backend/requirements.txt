@@ -47,3 +47,13 @@ umap-learn>=0.5.6
 
 # ONNX 커스텀 모델 추론
 onnxruntime>=1.18.0
+
+# Augmentation (Qwen-Edit)
+torch>=2.0.0
+torchvision>=0.15.0
+diffusers>=0.29.0
+transformers>=4.41.0
+accelerate>=0.31.0
+peft>=0.11.0
+huggingface_hub>=0.23.0
+bitsandbytes>=0.43.0

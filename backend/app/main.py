@@ -18,6 +18,7 @@ from app.routers import (
     refinement as refinement_router,
     ontology as ontology_router,
     export as export_router,
+    augmentation as augmentation_router,
 )
 from app.routers.ontology import rules_router
 from app.routers.analysis import analysis_router as coco_analysis_router
@@ -98,6 +99,7 @@ app.include_router(model_versions_router, prefix=API_PREFIX)
 app.include_router(lineage_router, prefix=API_PREFIX)
 app.include_router(auto_label_router, prefix=API_PREFIX)
 app.include_router(onnx_models_router, prefix=API_PREFIX)
+app.include_router(augmentation_router.router, prefix=API_PREFIX)
 
 
 @app.get("/api/health")

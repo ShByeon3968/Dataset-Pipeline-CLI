@@ -127,5 +127,16 @@ async def delete_dataset(dataset_id: int, db: AsyncSession = Depends(get_db)):
     ds = await db.get(Dataset, dataset_id)
     if not ds:
         raise HTTPException(status_code=404, detail="Dataset not found.")
+    
+    # DB에서 삭제 및 Shard 해제
     await db.delete(ds)
     await shard_router.remove_dataset(dataset_id)
+    
+    # 파일시스템에서 실제 이미지 파일 디렉터리 삭제
+    import shutil
+    import os
+    from app.core.config import get_settings
+    settings = get_settings()
+    upload_dir = os.path.join(settings.uploads_dir, str(dataset_id))
+    if os.path.exists(upload_dir):
+        shutil.rmtree(upload_dir, ignore_errors=True)
