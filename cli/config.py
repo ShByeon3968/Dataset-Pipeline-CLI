@@ -22,7 +22,7 @@ except ImportError:
         tomllib = None  # type: ignore
 
 
-_DEFAULT_BASE_URL = "http://localhost:8000"
+_DEFAULT_BASE_URL = "http://localhost:8001"
 _DEFAULT_TIMEOUT  = 120.0
 
 

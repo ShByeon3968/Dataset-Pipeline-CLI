@@ -14,6 +14,7 @@ from rich.panel import Panel
 from rich import box
 
 console = Console()
+err_console = Console(stderr=True)
 
 
 # ── 메시지 출력 ───────────────────────────────────────────────────────
@@ -23,7 +24,7 @@ def success(msg: str) -> None:
 
 
 def error(msg: str) -> None:
-    console.print(f"[bold red]✗[/bold red]  {msg}", err=True)
+    err_console.print(f"[bold red]✗[/bold red]  {msg}")
 
 
 def info(msg: str) -> None:
