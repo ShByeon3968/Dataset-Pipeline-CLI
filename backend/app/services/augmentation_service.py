@@ -143,7 +143,7 @@ def _get_qwen_pipeline():
             #    enable_model_cpu_offload() 는 컴포넌트 단위(text_encoder/transformer/vae)로
             #    GPU ↔ CPU 를 forward hook 으로 관리하므로 bitsandbytes 와 충돌하지 않음.
             _qwen_pipeline = QwenImageEditPipeline.from_pretrained(
-                "ovedrive/Qwen-Image-Edit-2511-4bit",
+                "Qwen/Qwen-Image-Edit-2511",
                 torch_dtype=torch.bfloat16,
                 low_cpu_mem_usage=True,
                 local_files_only=False,
@@ -159,7 +159,7 @@ def _get_qwen_pipeline():
             _qwen_pipeline.enable_attention_slicing(slice_size=1)
 
             logger.info("Loading Multiple-angles LoRA...")
-            _qwen_pipeline.load_lora_weights("dx8152/Qwen-Edit-2509-Multiple-angles")
+            _qwen_pipeline.load_lora_weights("fal/Qwen-Image-Edit-2511-Multiple-Angles-LoRA")
             _qwen_pipeline.set_progress_bar_config(disable=True)
 
             # ── VAE 메모리 절약
@@ -255,6 +255,11 @@ async def run_augmentation_task(
         # Iterate over all images and augment
         for img_idx, img in enumerate(images):
             try:
+                # 이미 증강된 이미지 건너뛰기 (파일명이 'aug_'로 시작하거나 '_aug_'가 포함된 경우)
+                if img.filename and (img.filename.startswith("aug_") or "_aug_" in img.filename):
+                    logger.info(f"Skipping already augmented image: {img.filename}")
+                    continue
+                    
                 abs_path = resolve_filepath(img.filepath)
                 if not os.path.exists(abs_path):
                     continue
