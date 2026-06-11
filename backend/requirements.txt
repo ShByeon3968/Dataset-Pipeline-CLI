@@ -1,3 +1,4 @@
+--extra-index-url https://download.pytorch.org/whl/cu121
 # FastAPI & ASGI
 fastapi>=0.111.0
 uvicorn[standard]>=0.30.0
@@ -49,10 +50,10 @@ umap-learn>=0.5.6
 onnxruntime>=1.18.0
 
 # Augmentation (Qwen-Edit)
-torch>=2.0.0
-torchvision>=0.15.0
+torch==2.5.1+cu121
+torchvision==0.20.1+cu121
 diffusers>=0.29.0
-transformers>=4.41.0
+transformers==4.49.0
 accelerate>=0.31.0
 peft>=0.11.0
 huggingface_hub>=0.23.0
